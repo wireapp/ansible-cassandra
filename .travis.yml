@@ -1,0 +1,22 @@
+---
+language: python
+services: docker
+
+env:
+  global:
+    - ROLE_NAME: ansible-cassandra
+  matrix:
+    - MOLECULE_DISTRO: ubuntu1604
+
+install:
+  # Install test dependencies.
+  - pip install molecule docker
+
+script:
+  # Run tests.
+  - molecule test
+
+# ansible-galaxy import
+# notifications:
+#   webhooks: https://galaxy.ansible.com/api/v1/notifications/
+
