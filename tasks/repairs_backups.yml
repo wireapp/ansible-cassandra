@@ -1,0 +1,95 @@
+---
+
+# Install awscli for backup scripts
+#
+# Unfortunately, we also need 'pip' to properly install 'awscli',
+# which pulls in some unwanted stuff (namely 'build-essential').
+- name: install awscli
+  pip:
+    name: "awscli"
+    state: latest
+  when: cassandra_backup_enabled
+
+- name: render repair script
+  template:
+    src: cassandra_repair.j2
+    dest: /usr/local/bin/cassandra_repair_{{ cassandra_cluster_name }}
+    mode: 0755
+    owner: cassandra
+    group: cassandra
+  tags:
+    - repair
+
+- name: render backup script
+  template:
+    src: cassandra_backup.j2
+    dest: /usr/local/bin/cassandra_backup_{{ cassandra_cluster_name }}
+    mode: 0755
+    owner: cassandra
+    group: cassandra
+  when: cassandra_backup_enabled
+  tags:
+    - backup
+
+- name: render restore script
+  template:
+    src: cassandra_restore.j2
+    dest: /usr/local/bin/cassandra_restore
+    mode: 0755
+    owner: cassandra
+    group: cassandra
+  when: cassandra_backup_enabled
+  tags:
+    - backup
+
+- name: render incremental backup script
+  template:
+    src: cassandra_incremental_backup.j2
+    dest: /usr/local/bin/cassandra_incremental_backup_{{ cassandra_cluster_name }}
+    mode: 0755
+    owner: cassandra
+    group: cassandra
+  when: cassandra_backup_enabled
+  tags:
+    - backup
+
+# Make sure the timing of this doesn't coincide with scheduled repairs
+# see 'cassandra_repair_slots' defined in defaults/main.yml
+- name: set up cron job for daily backup
+  cron:
+    name: cassandra_backup_{{ cassandra_cluster_name }}
+    minute: 0
+    hour: '{{ cassandra_backup_hour }}'
+    job: "flock --wait 3600 /tmp/backup_repair_mutex /usr/local/bin/cassandra_backup_{{ cassandra_cluster_name }} 2>&1 | systemd-cat -t cassandra-backup"
+    state: present
+  when: cassandra_backup_enabled
+  tags:
+    - backup
+
+- name: set up cron job for incremental backup
+  cron:
+    name: cassandra_incremental_backup_{{ cassandra_cluster_name }}
+    minute: '0,15,30,45'
+    job: "flock -n /tmp/incr_bckup_excl_lock /usr/local/bin/cassandra_incremental_backup_{{ cassandra_cluster_name }} 2>&1 | systemd-cat -t cassandra-backup"
+    state: present
+  when: cassandra_backup_enabled
+  tags:
+    - backup
+
+# See cassandra_repair_slots note in defaults/main.yml
+- name: set up cron job for repair
+  cron:
+    name: cassandra_repair_{{ cassandra_cluster_name }}
+    minute: '{{ item.1.minute|default(0) }}'
+    hour: '{{ item.1.hour|default(0) }}'
+    day: '{{ item.1.day|default("*") }}'
+    month: '{{ item.1.month|default("*") }}'
+    weekday: '{{ item.1.weekday|default("*") }}'
+    job: "flock -n /tmp/backup_repair_mutex /usr/local/bin/cassandra_repair_{{ cassandra_cluster_name }} 2>&1 | systemd-cat -t cassandra-repair"
+    state: present
+  with_zip_cycle:
+    - '{{ cassandra_all_instances }}'
+    - '{{ cassandra_repair_slots }}'
+  when: item.0 == inventory_hostname or item.0 == ansible_default_ipv4.address
+  tags:
+    - repair

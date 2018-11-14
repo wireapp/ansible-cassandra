@@ -1,0 +1,180 @@
+---
+- name: add cassandra binaries to default login shell
+  template:
+    src: 'cassandra.sh.j2'
+    dest: '/etc/profile.d/cassandra.sh'
+    mode: 0644
+
+- name: resolve platform specific vars
+  include_vars: '{{item}}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml'
+        - '{{ ansible_distribution }}.yml'
+        - '{{ ansible_os_family }}.yml'
+      skip: true
+      paths:
+        - '{{ role_path }}/defaults'
+
+- name: "install OS dependent packages {{ cassandra_dep_os_pkgs }}"
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items: '{{ cassandra_dep_os_pkgs }}'
+
+# This is the maximum number of memory map areas a process may have, which is
+# generally too low for cassandra (and in 3.11 it issues warnings). Some more info
+# here: https://issues.apache.org/jira/browse/CASSANDRA-13008
+- name: set vm.max_map_count=1048575
+  sysctl:
+    name: vm.max_map_count
+    value: 1048575
+    sysctl_set: true
+    reload: true
+
+# This is set when installing cassandra via debian package,
+# see https://git1-us-west.apache.org/repos/asf?p=cassandra.git;a=blob;f=debian/cassandra-sysctl.conf;h=443e83f81c352ffb21f2b2302f09f0c9fefca23e;hb=0766f7e54182d04ecf5a15a732f5ec7951d62326
+- name: set net.ipv4.tcp_keepalive_time=300
+  sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: 300
+    sysctl_set: true
+    reload: true
+
+- name: 'ensure group {{ cassandra_group }} exists'
+  group:
+    name: '{{ cassandra_group }}'
+    state: present
+
+- name: 'ensure user {{ cassandra_user }} exists'
+  user:
+    name: '{{ cassandra_user }}'
+    state: present
+    createhome: false
+
+- name: check for install
+  become: true
+  stat:
+    path: '{{ cassandra_install_dir }}/bin/cassandra'
+  changed_when: false
+  register: cassandra_binary
+
+- when: not cassandra_binary.stat.exists
+  block:
+    - name: grab tarball
+      get_url:
+        url: '{{ cassandra_url }}'
+        dest: '/var/tmp/{{ cassandra_file }}'
+        mode: 0644
+        owner: '{{ cassandra_user }}'
+        group: '{{ cassandra_group }}'
+        sha256sum: '{{ cassandra_sha256 }}'
+
+    - name: unpack tarball
+      unarchive:
+        remote_src: true
+        src: '/var/tmp/{{ cassandra_file }}'
+        dest: '{{ cassandra_install_parent_dir }}'
+        creates: '{{ cassandra_install_dir }}/bin/cassandra'
+
+    - name: chown tree
+      file:
+        path: "{{ cassandra_install_dir }}"
+        owner: '{{ cassandra_user }}'
+        group: '{{ cassandra_group }}'
+        recurse: true
+  always:
+    - name: cleanup
+      become: true
+      become_user: root
+      file:
+        path: "/var/tmp/{{ cassandra_file }}"
+        state: absent
+
+- name: symlink home
+  file:
+    src: '{{ cassandra_install_dir }}'
+    dest: '{{ cassandra_link_dir }}'
+    state: link
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    force: true
+
+# Unfortunately this couldn't only be a symlink
+# As nodetool tries to guess its config location
+# via non-dereferencing means. In that case
+# some env vars needed to be set.
+- name: create a handy nodetool in path
+  copy:
+    src: nodetool
+    dest: '{{ cassandra_shortcut_path }}/nodetool'
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    mode: 0755
+
+- name: create a handy cqlsh in path
+  copy:
+    src: cqlsh
+    dest: '{{ cassandra_shortcut_path }}/cqlsh'
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    mode: 0755
+
+- name: create data directories under /mnt
+  file:
+    path: /mnt/cassandra/{{ item }}/
+    mode: 0775
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    state: directory
+  with_items:
+    - data
+    - commitlog
+    - saved_caches
+    - hints
+
+- name: create gc log directory
+  file:
+    path: '{{ cassandra_gc_log_dir }}'
+    mode: 0775
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    state: directory
+
+- name: install logback.xml
+  copy:
+    src: logback.xml
+    dest: "{{ cassandra_link_dir }}/conf/logback.xml"
+    mode: 0644
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    backup: true
+  when: cassandra_install_custom_logback
+
+- name: download prometheus jmx exporter jar
+  get_url:
+    url: "{{ prometheus_jmx_url }}"
+    dest: /opt/cassandra/lib
+    mode: 0644
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    sha256sum: '{{ prometheus_jmx_sha256 }}'
+  when: cassandra_install_prometheus_jmx_exporter
+
+- name: prometheus jmx config
+  copy:
+    src: prometheus-jmx.yml
+    dest: /opt/cassandra/conf/prometheus-jmx.yml
+    mode: 0644
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+  when: cassandra_install_prometheus_jmx_exporter
+
+- name: main configuration (cassandra.yaml)
+  template:
+    src: cassandra.yaml.j2
+    dest: '{{ cassandra_link_dir }}/conf/cassandra.yaml'
+    mode: 0644
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+    backup: true

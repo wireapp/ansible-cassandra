@@ -1,0 +1,25 @@
+---
+- name: extra environment variables file for systemd unit
+  template:
+    src: env.sh.j2
+    dest: '{{ cassandra_link_dir }}/env.sh'
+    mode: 0644
+    owner: '{{ cassandra_user }}'
+    group: '{{ cassandra_group }}'
+
+- name: install systemd cassandra.service unit
+  template:
+    src: '{{ item }}.j2'
+    dest: '/etc/systemd/system/{{ item }}'
+    mode: 0644
+  register: cassandra_service_installed
+  with_items:
+    - cassandra.service
+
+- name: enable and start cassandra systemd service
+  systemd:
+    name: cassandra.service
+    daemon_reload: "{{ cassandra_service_installed.changed }}"
+    enabled: true
+    state: started
+  when: cassandra_activate

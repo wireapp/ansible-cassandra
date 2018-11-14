@@ -1,0 +1,119 @@
+---
+# defaults file for ansible-cassandra
+
+cassandra_version: '3.11.0'  # TODO: upgrade?
+cassandra_sha256: 'd597b99b402bd2cf925033519db9e58340acb893fd83d600d904ba4041d44fa7'
+cassandra_file: 'apache-cassandra-{{ cassandra_version }}-bin.tar.gz'
+cassandra_mirror: 'http://archive.apache.org/dist/cassandra'
+cassandra_url: '{{ cassandra_mirror }}/{{ cassandra_version }}/{{ cassandra_file }}'
+cassandra_storage_port: 7000
+cassandra_ssl_storage_port: 7001
+cassandra_native_transport_port: 9042
+cassandra_rpc_port: 9160
+cassandra_install_parent_dir: "/opt"
+cassandra_link_dir: "/opt/cassandra"
+cassandra_install_dir: "{{ cassandra_install_parent_dir }}/apache-cassandra-{{ cassandra_version }}"
+cassandra_gc_log_dir: "{{ cassandra_install_dir }}/logs"
+cassandra_group: cassandra
+cassandra_user: cassandra
+cassandra_shortcut_path: /usr/local/bin
+
+## config parameters
+#
+# Perhaps this can be further tuned.
+# https://docs.datastax.com/en/cassandra/3.0/cassandra/operations/opsTuneJVM.html
+cassandra_key_cache_size_in_mb: 100
+cassandra_concurrent_reads: 128
+cassandra_concurrent_writes: 128
+
+
+# custom flags
+cassandra_install_custom_logback: true
+cassandra_disable_swap: true
+
+## Backups
+#
+# recommended to enable this; requires setting 'cassandra_backup_s3_bucket'
+cassandra_backup_enabled: false
+# uncomment, set a name here and ensure access rights to an S3 bucket
+# cassandra_backup_s3_bucket:
+# used in naming backups in case you have more than one environment (e.g. production, staging, ...)
+cassandra_env: dev
+
+# Cluster information
+cassandra_cluster_name: default
+cassandra_role: 'cassandra_{{ cassandra_cluster_name }}'
+cassandra_seed_role: '{{ cassandra_role }}_seed'
+cassandra_keyspaces: []
+cassandra_metrics_prefix: 'cassandra_{{ cassandra_cluster_name }}'
+
+cassandra_snitch: '{% if is_aws_environment %}Ec2Snitch{% else %}SimpleSnitch{% endif %}'
+
+cassandra_network_interface: "{% if ansible_default_ipv4 is defined %}{{ ansible_default_ipv4.interface }}{% else %}eth0{% endif %}"
+
+# seed resolution can be:
+# A. static (then provide 'cassandra_seeds')
+# or
+# B. dynamic (then ensure some cassandra instances are in a 'cassandra_seed_groupname' inventory group, and the rest (or all) are in the 'cassandra_groupname' inventory group)
+cassandra_seed_resolution: dynamic
+cassandra_seed_groupname: cassandra_seed
+cassandra_groupname: cassandra
+cassandra_seeds: []
+cassandra_seed_resolved: '{% if cassandra_seed_resolution == "static" %}{{ cassandra_seeds | join(",")}}{% else %}{% for host in groups[cassandra_seed_groupname] %}{{hostvars[host]["ansible_" + cassandra_network_interface]["ipv4"]["address"]}}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}'
+cassandra_all_instances: '{{ groups[cassandra_seed_groupname]|union(groups[cassandra_groupname])|reverse|list }}'
+
+# start cassandra immediately via systemd?
+cassandra_activate: true
+
+# prometheus jmx exporter
+cassandra_install_prometheus_jmx_exporter: true
+prometheus_jmx_port: 8081
+prometheus_jmx_version: '0.10'  # cf.: https://github.com/prometheus/jmx_exporter/issues/(155|156)
+prometheus_jmx_sha256: b144a5a22fc9ee62d8d198f0dcc622f851c77cf52fee4bd529afbc266af37e29
+prometheus_jmx_sha512: bdcf3414e5fc4d5760839333044e398e12a8e8c8dabf026805b3b2a5135aca90a81c91f81e7aac6b3b5f296bc10fbc19a3becd5ff12214c99e929bbec4c22ecb
+prometheus_jmx_url: "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/{{ prometheus_jmx_version }}/jmx_prometheus_javaagent-{{ prometheus_jmx_version }}.jar"
+
+
+# Default time for backups is 4pm - if you change this ensure there is no overlap with the weekly repair slots.
+cassandra_backup_hour: 16
+
+# Default slots for weekly repairs, assuming the default gc_grace_seconds (10 days).
+# n.b. Repair slots are assigned to all nodes in the combined list of
+# instances in 'cassandra_seed_groupname' and 'cassandra_groupname' in order.
+# The order is stable and repair slots do not move when new instances are added.
+# However, they do move by 1 slot backwards per removed instance for all
+# instances that are newer than the removed instance.
+# If there are more instances than repair slots, the slots are repeated,
+# i.e. a slot is assigned to more than one instance.
+cassandra_repair_slots:
+  - { weekday: '0', hour: '0' }
+  - { weekday: '1', hour: '0' }
+  - { weekday: '2', hour: '0' }
+  - { weekday: '3', hour: '0' }
+  - { weekday: '4', hour: '0' }
+  - { weekday: '5', hour: '0' }
+  - { weekday: '6', hour: '0' }
+
+  - { weekday: '0', hour: '2' }
+  - { weekday: '1', hour: '2' }
+  - { weekday: '2', hour: '2' }
+  - { weekday: '3', hour: '2' }
+  - { weekday: '4', hour: '2' }
+  - { weekday: '5', hour: '2' }
+  - { weekday: '6', hour: '2' }
+
+  - { weekday: '0', hour: '4' }
+  - { weekday: '1', hour: '4' }
+  - { weekday: '2', hour: '4' }
+  - { weekday: '3', hour: '4' }
+  - { weekday: '4', hour: '4' }
+  - { weekday: '5', hour: '4' }
+  - { weekday: '6', hour: '4' }
+
+  - { weekday: '0', hour: '6' }
+  - { weekday: '1', hour: '6' }
+  - { weekday: '2', hour: '6' }
+  - { weekday: '3', hour: '6' }
+  - { weekday: '4', hour: '6' }
+  - { weekday: '5', hour: '6' }
+  - { weekday: '6', hour: '6' }

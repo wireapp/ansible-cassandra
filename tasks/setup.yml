@@ -1,0 +1,30 @@
+---
+- name: Ensure apt cache is updated
+  apt:
+    update_cache: true
+  changed_when: false
+  when: ansible_os_family == 'Debian'
+
+# needed for the 'ip' command to populate 'ansible_default_ipv4'
+- name: install iproute2 and ensure apt cache is updated
+  apt:
+    name: iproute2
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: populate 'ansible_default_ipv4'
+  setup:
+  when: ansible_default_ipv4 is not defined
+
+- name: Check if inside AWS.
+  uri:
+    url: http://169.254.169.254/latest/meta-data
+    timeout: 2
+  register: aws_uri_check
+  when: is_aws_environment is not defined
+  failed_when: false
+
+- name: set is_aws_environment
+  set_fact:
+    is_aws_environment: "{{ aws_uri_check.status == 200 }}"
+  when: is_aws_environment is not defined

@@ -1,0 +1,4 @@
+---
+cassandra_dep_os_pkgs:
+  - procps
+  - libjemalloc1

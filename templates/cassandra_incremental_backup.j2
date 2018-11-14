@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -e
+
+#################################
+####### Prepare Variables #######
+#################################
+
+# Default cron has limited path and nodetool and
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+bucket={{ cassandra_backup_s3_bucket }}
+
+base=/mnt/cassandra/data
+
+day_bucket=$(date +"%Y-%m-%d")
+host=$(hostname)
+backup_base="{{ cassandra_env }}-{{ cassandra_role }}/${day_bucket}/${host}/incremental"
+
+par=2
+
+metrics_dir=/var/lib/node-exporter/textfile-collector
+mkdir -p -m 777 $metrics_dir
+metrics_file=${metrics_dir}/cassandra_incremental_backup.prom
+metrics_tmpl='
+# TYPE cassandra_backup counter
+# HELP cassandra_backup Counts the number of successful backups
+cassandra_backup{type="incremental",errno="%d"} 1 %d
+
+# TYPE cassandra_backup_duration_seconds gauge
+# HELP cassandra_backup_duration_seconds Track the duration of the backup task, in seconds
+cassandra_backup_duration_seconds{type="incremental",errno="%s"} %d %d
+'
+
+started_at=$(date +%s%3N)
+
+function report_metrics {
+  local errno=$?
+
+  now=$(date +%s%3N)
+  # nb. the date must be milliseconds since the epoch
+  printf "$metrics_tmpl" "$errno" "$now" "$errno" $(((now-started_at)/1000)) "$now" > ${metrics_file}.$$ \
+    && mv -v ${metrics_file}.$$ ${metrics_file}  || true
+
+  exit $errno
+}
+trap report_metrics EXIT
+
+
+#################################
+#####          Upload      ######
+#################################
+
+# Only occupy CPU #1
+taskset -p 0x00000001 $$ > /dev/null 2>&1
+
+# Not using a variable for "backups" to avoid catastrophes
+backup_files=$base/*/*/backups/*
+
+# Set default directory to somewhere unimportant
+# to secure find from searching / in case some
+# variable in the find command isn't available
+# by mistake.
+cd /tmp/
+
+# If no file to backup, return successfully
+# -mindepth is there to reduce chance of accidents
+[ -n "$(find $base -mindepth 4 -path "$backup_files" | head -n 1)" ] || exit 0
+
+#Delete anything that's older than 30 minutes. DANGER! DANGER!
+find $base -path "$backup_files" -mmin +30 -exec rm -v {} \;
+
+# Poor man's retry function
+function retry3 { $1 || $1 || $1; }
+export -f retry3
+
+#Upload to S3
+for local_file in $backup_files; do
+       backups_subdir_removed=${local_file//backups\/}
+       key_name=$backup_base${backups_subdir_removed#$base}
+       echo "$bucket" "$key_name" "$local_file"
+done | xargs -P$par -n3 bash -c \
+    'retry3 "aws s3 cp $3 s3://$1/$2 --expected-size $(stat --printf='%s' $3) --no-guess-mime-type" && rm -v $3 || (echo Upload failed! && exit 255)' -

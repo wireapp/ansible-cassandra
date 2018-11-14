@@ -1,0 +1,8 @@
+---
+- src: git+https://github.com/geerlingguy/ansible-role-java
+  name: ansible-role-java
+  version: 1.9.4
+
+- src: git+https://github.com/geerlingguy/ansible-role-ntp
+  name: ansible-role-ntp
+  version: 1.6.2

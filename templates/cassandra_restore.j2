@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z ${TMP_WORKING_DIR+x} ]; then echo "Set TMP_WORKING_DIR to an empty directory"; exit 1; fi
+
+if [ -z ${SSTABLE_LOADER+x} ]; then echo "Set SSTABLE_LOADER to Cassandra's sstableloader binary"; exit 1; fi
+if [ -z ${CASSANDRA_YAML+x} ]; then echo "Set CASSANDRA_YAML to your cluster's cassandra.yaml file"; exit 1; fi
+
+if [ -z ${CASSANDRA_HOST+x} ]; then echo "Set CASSANDRA_HOST to a Cassandra host/IP"; exit 1; fi
+if [ -z ${CASSANDRA_KSP+x} ]; then echo "Set CASSANDRA_KSP to the target keyspace name"; exit 1; fi
+if [ -z ${CASSANDRA_CF+x} ]; then echo "Set CASSANDRA_CF to the target column family name"; exit 1; fi
+
+if [ -z ${SOURCE_ENV+x} ]; then echo "Set SOURCE_ENV to the source's environment"; exit 1; fi
+if [ -z ${SOURCE_ROLE+x} ]; then echo "Set SOURCE_ROLE to the role of the cluster it was backed up from"; exit 1; fi
+
+if [ -z ${SOURCE_HOSTNAME+x} ]; then echo "Set SOURCE_HOSTNAME to the node's hostname, like ip-11-222-3-44"; exit 1; fi
+
+if [ -z ${SOURCE_BACKUP_DATE+x} ]; then echo "Set SOURCE_BACKUP_DATE to the backup date, in format YYYY-DD-MM"; exit 1; fi
+if [ -z ${SOURCE_BACKUP_TIME+x} ]; then echo "Set SOURCE_BACKUP_TIME to the node's backup time, in format HH:MM:SS"; exit 1; fi
+
+S3_BACKUP_PATH=/$SOURCE_ENV-$SOURCE_ROLE/$SOURCE_BACKUP_DATE/$SOURCE_HOSTNAME/$SOURCE_BACKUP_TIME
+
+aws s3 sync "s3://{{ cassandra_backup_s3_bucket }}/$S3_BACKUP_PATH/$CASSANDRA_KSP/$CASSANDRA_CF" "$TMP_WORKING_DIR"
+
+"$SSTABLE_LOADER" -d "$CASSANDRA_HOST" -f "$CASSANDRA_YAML" "$TMP_WORKING_DIR/$S3_BACKUP_PATH/$CASSANDRA_KSP/$CASSANDRA_CF/"
+

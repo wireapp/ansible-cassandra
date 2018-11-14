@@ -1,0 +1,17 @@
+---
+lowercaseOutputLabelNames: true
+lowercaseOutputName: true
+rules:
+  - pattern: org.apache.cassandra.metrics<type=(Connection|Streaming), scope=(\S*), name=(\S*)><>(Count|Value|\d+thPercentile|\w+Rate|Max|Mean|Min|StdDev)
+    name: cassandra_$1_$3
+    labels:
+      address: "$2"
+      dim: "$4"
+  - pattern: org.apache.cassandra.metrics<type=(\S*)(?:, ((?!scope)\S*)=(\S*))?(?:, scope=(\S*))?, name=(\S*)><>(Count|Value|\d+thPercentile|\w+Rate|Max|Mean|Min|StdDev)
+    name: cassandra_$1_$5
+    labels:
+      "$1": "$4"
+      "$2": "$3"
+      dim: "$6"
+  - pattern: org.apache.cassandra.net<type=FailureDetector><>UpEndpointCount
+    name: cassandra_upendointcount

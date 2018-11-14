@@ -1,0 +1,25 @@
+# /usr/lib/systemd/system/cassandra.service
+
+[Unit]
+Description=Cassandra
+After=network.target
+
+[Service]
+# configure extra options for jmx exporter
+EnvironmentFile={{ cassandra_link_dir }}/env.sh
+# use a stable location for PID file even when multiple cassandra versions are installed (e.g. when upgrading).
+PIDFile={{ cassandra_install_parent_dir }}/cassandra.pid
+# We leave heap size calculation up to cassandra's defaults.
+ExecStart={{ cassandra_link_dir }}/bin/cassandra -f
+StandardOutput=journal
+StandardError=journal
+User={{ cassandra_user }}
+Group={{ cassandra_group }}
+LimitNOFILE=100000
+LimitMEMLOCK=infinity
+LimitNPROC=32768
+LimitAS=infinity
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
