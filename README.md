@@ -12,6 +12,8 @@ Ansible role to install an Apache Cassandra cluster supervised with systemd. Inc
 
 **Status: beta**, see [TODOs](#todo)
 
+[![Build Status](https://travis-ci.org/wireapp/ansible-cassandra.svg?branch=master)](https://travis-ci.org/wireapp/ansible-cassandra)
+
 <!-- vim-markdown-toc GFM -->
 
 * [Ansible Requirements](#ansible-requirements)

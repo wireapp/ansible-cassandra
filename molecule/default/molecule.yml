@@ -13,9 +13,9 @@ platforms:
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     networks_mode: host
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro # for systemd
-      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro # for ntp/timedatectl
-    privileged: true # for systemd
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro  # for systemd
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro  # for ntp/timedatectl
+    privileged: true  # for systemd
     groups:
       - cassandra_seed
     pre_build_image: true
@@ -25,9 +25,9 @@ platforms:
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     networks_mode: host
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro # for systemd
-      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro # for ntp/timedatectl
-    privileged: true # for systemd
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro  # for systemd
+      - /run/dbus/system_bus_socket:/run/dbus/system_bus_socket:ro  # for ntp/timedatectl
+    privileged: true  # for systemd
     groups:
       - cassandra
     pre_build_image: true
