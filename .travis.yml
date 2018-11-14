@@ -14,7 +14,7 @@ install:
 
 script:
   # Run tests.
-  - molecule test
+  - travis_wait 50 molecule test
 
 # ansible-galaxy import
 # notifications:
