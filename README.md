@@ -151,7 +151,7 @@ It seems OpenJDK is the more future-proof thing to use.
 
 ## Development setup
 
-Install [molecule](https://github.com/ansible/molecule). E.g. ensure you have docker installed, then, using a virtualenv, `pip install molecule ansible docker-py`.
+Install [molecule](https://github.com/ansible/molecule). E.g. ensure you have docker installed, then, using a virtualenv, `pip install molecule ansible docker`.
 
 * `molecule converge` to run the playbook against docker containers
 * `molecule lint` and `molecule syntax` to improve yaml.

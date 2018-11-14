@@ -40,6 +40,10 @@
     value: 300
     sysctl_set: true
     reload: true
+  # skip this task in docker on travis/for testing as it errors with
+  #     sysctl: cannot stat /proc/sys/net/ipv4/tcp_keepalive_time: No such file or directory
+  # more info: https://github.com/moby/moby/issues/4717
+  when: ansible_virtualization_type != "docker"
 
 - name: 'ensure group {{ cassandra_group }} exists'
   group:
