@@ -17,5 +17,6 @@ script:
   - travis_wait 50 molecule test
 
 # ansible-galaxy import
-# notifications:
-#   webhooks: https://galaxy.ansible.com/api/v1/notifications/
+# https://docs.ansible.com/ansible/latest/reference_appendices/galaxy.html#travis-integrations
+notifications:
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/

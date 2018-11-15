@@ -26,6 +26,7 @@ galaxy_info:
     - apache
     - cassandra
     - cluster
+    - database
 
 dependencies: []
 # List your role dependencies here, one per line. Be sure to remove the '[]' above,
