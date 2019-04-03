@@ -165,7 +165,6 @@ This role has been inspired by
 
 ## TODO
 
-* [ ] write ansible check at the end of playbook checking cassandra port is open
 * [ ] WARN: JMX is not enabled to receive remote connections. Please see cassandra-env.sh for more info.
 * [ ] test backups and restore
 * [ ] document usage of prometheus .prom files and node-exporter
