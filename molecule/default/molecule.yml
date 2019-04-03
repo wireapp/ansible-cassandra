@@ -9,7 +9,7 @@ platforms:
   # Two containers, one in the group 'cassandra' and one in the group 'cassandra_seed'
   - name: instance
     # for systemd, use these base images:
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1804}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     networks_mode: host
     volumes:
@@ -21,7 +21,7 @@ platforms:
     pre_build_image: true
   - name: instance2
     # for systemd, use these base images:
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1804}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     networks_mode: host
     volumes:
