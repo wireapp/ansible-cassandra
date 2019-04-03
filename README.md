@@ -136,10 +136,6 @@ AGPL. See [LICENSE](LICENSE)
 
 As of November 2018, the cassandra homepage lists both openJDK and Oracle Java as supported (and offers their download links).
 
-But when using openJDK, cassandra itself logs:
-
-> WARN: OpenJDK is not recommended. Please upgrade to the newest Oracle Java release
-
 In the [official upgrade-to-DSE docs](https://docs.datastax.com/en/pdf/upgrade.pdf) one can find:
 
 > Important:
@@ -147,7 +143,7 @@ In the [official upgrade-to-DSE docs](https://docs.datastax.com/en/pdf/upgrade.p
 > extensive testing on OpenJDK 8 starting with DSE 6.0.3. This change is due to the
 > end of public updates for Oracle JRE/JDK 8.)
 
-It seems OpenJDK is the more future-proof thing to use.
+It seems OpenJDK is the more future-proof JVM to use. This role is tested using openjdk.
 
 ## Development setup
 
