@@ -23,8 +23,6 @@ backup_base="{{ cassandra_env }}-{{ cassandra_role }}/${day_bucket}/${host}/${ti
 empty_file=/tmp/empty
 done_msg=BACKUP_DONE_SUCCESSFULLY
 
-par=2
-
 metrics_dir=/var/lib/node-exporter/textfile-collector
 mkdir -p -m 777 $metrics_dir
 metrics_file=${metrics_dir}/cassandra_backup.prom
@@ -78,12 +76,12 @@ function retry3 { $1 || $1 || $1; }
 export -f retry3
 
 # Upload to S3
-for local_file in $base/*/*/$snaps/$sid/*; do
-       snapshot_subdir_removed=${local_file//$snaps\/$sid\/};
+for snapshot_subdir in $base/*/*/$snaps/$sid/; do
+       snapshot_subdir_removed=${snapshot_subdir//$snaps\/$sid\/};
        key_name=$backup_base${snapshot_subdir_removed#$base}
-       echo $bucket $key_name $local_file;
-done | xargs -P$par -n3 bash -c \
-  'retry3 "aws s3 cp $3 s3://$1/$2 --expected-size $(stat --printf='%s' $3) --no-guess-mime-type" || (echo Upload failed! && exit 255)' -
+       echo $bucket $key_name $snapshot_subdir;
+done | xargs -n3 bash -c \
+  'retry3 "aws s3 sync $3 s3://$1/$2 --no-guess-mime-type" || (echo Upload failed! && exit 255)' -
 
 #################################
 #### Mark remote as done  #######

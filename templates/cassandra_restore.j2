@@ -19,9 +19,13 @@ if [ -z ${SOURCE_HOSTNAME+x} ]; then echo "Set SOURCE_HOSTNAME to the node's hos
 if [ -z ${SOURCE_BACKUP_DATE+x} ]; then echo "Set SOURCE_BACKUP_DATE to the backup date, in format YYYY-DD-MM"; exit 1; fi
 if [ -z ${SOURCE_BACKUP_TIME+x} ]; then echo "Set SOURCE_BACKUP_TIME to the node's backup time, in format HH:MM:SS"; exit 1; fi
 
-S3_BACKUP_PATH=/$SOURCE_ENV-$SOURCE_ROLE/$SOURCE_BACKUP_DATE/$SOURCE_HOSTNAME/$SOURCE_BACKUP_TIME
+S3_BACKUP_PATH=$SOURCE_ENV-$SOURCE_ROLE/$SOURCE_BACKUP_DATE/$SOURCE_HOSTNAME/$SOURCE_BACKUP_TIME
 
-aws s3 sync "s3://{{ cassandra_backup_s3_bucket }}/$S3_BACKUP_PATH/$CASSANDRA_KSP/$CASSANDRA_CF" "$TMP_WORKING_DIR"
+mkdir -p $TMP_WORKING_DIR/$CASSANDRA_KSP/
 
-"$SSTABLE_LOADER" -d "$CASSANDRA_HOST" -f "$CASSANDRA_YAML" "$TMP_WORKING_DIR/$S3_BACKUP_PATH/$CASSANDRA_KSP/$CASSANDRA_CF/"
+aws s3 sync "s3://{{ cassandra_backup_s3_bucket }}/$S3_BACKUP_PATH/$CASSANDRA_KSP/" "$TMP_WORKING_DIR/$CASSANDRA_KSP/"
 
+# Note: Folder names for cassandra 3.11 are composed of <column family>-<some hash>, the hash is unknown in advance (or is it?)
+# Use `-*` bash extension to guess the hash part.
+# Relies on the column family name not having a "-" in it
+"$SSTABLE_LOADER" -d "$CASSANDRA_HOST" -f "$CASSANDRA_YAML" $TMP_WORKING_DIR/$CASSANDRA_KSP/$CASSANDRA_CF-*/

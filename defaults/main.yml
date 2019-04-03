@@ -60,7 +60,7 @@ cassandra_seed_groupname: cassandra_seed
 cassandra_groupname: cassandra
 cassandra_seeds: []
 cassandra_seed_resolved: '{% if cassandra_seed_resolution == "static" %}{{ cassandra_seeds | join(",")}}{% else %}{% for host in groups[cassandra_seed_groupname] %}{{hostvars[host]["ansible_" + cassandra_network_interface]["ipv4"]["address"]}}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}'
-cassandra_all_instances: '{{ groups[cassandra_seed_groupname]|union(groups[cassandra_groupname])|reverse|list }}'
+cassandra_all_instances: '{{ groups[cassandra_seed_groupname]|union(groups[cassandra_groupname]|default([]))|reverse|list }}'
 
 # start cassandra immediately via systemd?
 cassandra_activate: true
