@@ -1,8 +1,8 @@
 ---
 # defaults file for ansible-cassandra
 
-cassandra_version: '3.11.0'  # TODO: upgrade?
-cassandra_sha256: 'd597b99b402bd2cf925033519db9e58340acb893fd83d600d904ba4041d44fa7'
+cassandra_version: '3.11.4'
+cassandra_sha256: '5d598e23c3ffc4db0301ec2b313061e3208fae0f9763d4b47888237dd9069987'
 cassandra_file: 'apache-cassandra-{{ cassandra_version }}-bin.tar.gz'
 cassandra_mirror: 'http://archive.apache.org/dist/cassandra'
 cassandra_url: '{{ cassandra_mirror }}/{{ cassandra_version }}/{{ cassandra_file }}'
@@ -72,7 +72,6 @@ prometheus_jmx_version: '0.10'  # cf.: https://github.com/prometheus/jmx_exporte
 prometheus_jmx_sha256: b144a5a22fc9ee62d8d198f0dcc622f851c77cf52fee4bd529afbc266af37e29
 prometheus_jmx_sha512: bdcf3414e5fc4d5760839333044e398e12a8e8c8dabf026805b3b2a5135aca90a81c91f81e7aac6b3b5f296bc10fbc19a3becd5ff12214c99e929bbec4c22ecb
 prometheus_jmx_url: "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/{{ prometheus_jmx_version }}/jmx_prometheus_javaagent-{{ prometheus_jmx_version }}.jar"
-
 
 # Default time for backups is 4pm - if you change this ensure there is no overlap with the weekly repair slots.
 cassandra_backup_hour: 16
