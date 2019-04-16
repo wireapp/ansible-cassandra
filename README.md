@@ -31,7 +31,7 @@ Ansible role to install an Apache Cassandra cluster supervised with systemd. Inc
 
 ## Ansible Requirements
 
-- ansible >= 2.4
+- ansible >= 2.4 (>= 2.7.9 recommended)
 - no additional requirements
 
 ## Role Variables
@@ -149,7 +149,7 @@ It seems OpenJDK is the more future-proof JVM to use. This role is tested using 
 
 Install [molecule](https://github.com/ansible/molecule). E.g. ensure you have docker installed, then, using a virtualenv, `pip install molecule ansible docker`.
 
-* `molecule converge` to run the playbook against docker containers
+* `molecule converge` to run the playbook against docker containers. If something fails, `molecule --debug converge` shows error details.
 * `molecule lint` and `molecule syntax` to improve yaml.
 * `molecule test` to destroy + converge + converge again for idempotence + destroy
 * `make` to run molecule converge on each file save.
@@ -165,7 +165,6 @@ This role has been inspired by
 
 ## TODO
 
-* [ ] write ansible check at the end of playbook checking cassandra port is open
 * [ ] WARN: JMX is not enabled to receive remote connections. Please see cassandra-env.sh for more info.
 * [ ] test backups and restore
 * [ ] document usage of prometheus .prom files and node-exporter

@@ -6,7 +6,7 @@
   when: ansible_os_family == 'Debian'
 
 # needed for the 'ip' command to populate 'ansible_default_ipv4'
-- name: install iproute2 and ensure apt cache is updated
+- name: install iproute2
   apt:
     name: iproute2
     state: present

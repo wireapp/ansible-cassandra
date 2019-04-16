@@ -23,3 +23,13 @@
     enabled: true
     state: started
   when: cassandra_activate
+
+- name: Wait for cassandra to startup
+  wait_for:
+    host: "{{ ansible_default_ipv4.address }}"
+    port: "{{ item }}"
+    delay: 5
+    connect_timeout: 1
+  when: cassandra_activate
+  with_items:
+    - "{{ cassandra_native_transport_port }}"

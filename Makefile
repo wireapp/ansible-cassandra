@@ -2,4 +2,4 @@
 default: watch
 
 watch:
-	find . | grep -v git | entr pipenv run molecule converge
+	find . | grep -v git | entr molecule converge

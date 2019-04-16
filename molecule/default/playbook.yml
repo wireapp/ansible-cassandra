@@ -7,6 +7,10 @@
         update_cache: true
       changed_when: false
       when: ansible_os_family == 'Debian'
+  vars:
+    # cassandra 3.11 doesn't support java 9 yet, use openjdk-8.
+    java_packages:
+      - openjdk-8-jdk
   roles:
     - ansible-role-ntp
     - ansible-role-java
