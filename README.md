@@ -1,13 +1,13 @@
 ## ansible-cassandra
 
-Ansible role to install an Apache Cassandra cluster supervised with systemd. Includes the following:
+Ansible role to install an Apache Cassandra cluster supervised by systemd. Includes the following:
 
 * Some OS tuning options such as installing jemalloc, setting max_map_count and tcp_keepalive, disabling swap.
 * Bootstraps nodes using the IPs of the servers in the `cassandra_seed` (configurable) inventory group.
 * Weekly scheduled repairs via cron jobs that are non-overlapping (see `cassandra_repair_slots`).
     * requires setting `cassandra_keyspaces` (default `[]` will have no effect)
-* Incremental and full backup scripts as well as a restore script. (NOTE: needs better testing)
-    * requires access to S3, optional, disabled by default
+* Incremental and full backup scripts as well as a restore script. (disabled by default, optional) (NOTE: needs better testing)
+    * backup/restore requires access to S3.
 * prometheus-style metrics using jmx-exporter
 
 **Status: beta**, see [TODOs](#todo)
@@ -32,7 +32,6 @@ Ansible role to install an Apache Cassandra cluster supervised with systemd. Inc
 ## Ansible Requirements
 
 - ansible >= 2.4 (>= 2.7.9 recommended)
-- no additional requirements
 
 ## Role Variables
 
@@ -49,12 +48,12 @@ You should override the keyspaces to match keyspaces on which you wish to run we
 cassandra_keyspaces: []
 ```
 
-You may wish to override the following defaults for backups:
+You may wish to override the following defaults to enable backups:
 
 ```yaml
 # backups
 cassandra_backup_enabled: false # recommended to enable this
-cassandra_backup_s3_bucket: # set a name here and ensure access rights to an S3 bucket
+cassandra_backup_s3_bucket: # set a name here and ensure hosts have access rights to an S3 bucket
 cassandra_env: dev # used in naming backups in case you have more than one environment (e.g. production, staging, ...)
 ```
 
@@ -150,9 +149,10 @@ It seems OpenJDK is the more future-proof JVM to use. This role is tested using 
 Install [molecule](https://github.com/ansible/molecule). E.g. ensure you have docker installed, then, using a virtualenv, `pip install molecule ansible docker`.
 
 * `molecule converge` to run the playbook against docker containers. If something fails, `molecule --debug converge` shows error details.
-* `molecule lint` and `molecule syntax` to improve yaml.
+* `molecule lint` and `molecule syntax` can be used to get feedback on your yaml changes.
 * `molecule test` to destroy + converge + converge again for idempotence + destroy
-* `make` to run molecule converge on each file save.
+
+If you want 'mocule converge' to be run each time you save a file in this repository, install entr, then run 'make'.
 
 * troubleshooting: [this issue](https://github.com/ansible/ansible/issues/43884) has been observed with molecule, ansible 2.7 and docker. Workaround was to downgrade to ansible 2.5.
 
