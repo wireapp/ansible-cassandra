@@ -1,7 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-from itertools import (izip, cycle)
+try:
+    # Python 2
+    from itertools import izip
+except ImportError:
+    # Python 3
+    izip = zip
+
+from itertools import cycle
+
 import ansible.errors as errors
 try:
     from __main__ import display
@@ -14,6 +22,7 @@ try:
     from ansible.plugins.lookup import LookupBase
     from ansible.utils.listify import listify_lookup_plugin_terms
     from jinja2.exceptions import UndefinedError
+
     class LookupModule(LookupBase):
         """
         Zip two arrays, thereby cycling through the second array:
@@ -76,4 +85,3 @@ except ImportError:
             res = [flatten(x) for x in izip(my_list[0], cycle(my_list[1]))]
             print("res: {}".format(res))
             return res
-
