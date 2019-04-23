@@ -7,6 +7,8 @@
         update_cache: true
       changed_when: false
       when: ansible_os_family == 'Debian'
+    - name: import yaml to disable gettys.
+      import_tasks: disable_getty.yml
   vars:
     # cassandra 3.11 doesn't support java 9 yet, use openjdk-8.
     java_packages:
