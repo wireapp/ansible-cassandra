@@ -26,7 +26,7 @@
 
 - name: Wait for cassandra to startup
   wait_for:
-    host: "{{ ansible_default_ipv4.address }}"
+    host: "{{ hostvars[inventory_hostname]['ansible_' + cassandra_network_interface].ipv4.address }}"
     port: "{{ item }}"
     delay: 5
     connect_timeout: 1
