@@ -1,1 +1,3 @@
-/opt/cassandra/bin/cqlsh {{hostvars[host]["ansible_" + cassandra_network_interface]["ipv4"]["address"]}} "$@"
+#!/usr/bin/env bash
+
+/opt/cassandra/bin/cqlsh {{ hostvars[ansible_hostname]["ansible_" + cassandra_network_interface]["ipv4"]["address"] }} "$@"
