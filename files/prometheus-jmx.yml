@@ -1,6 +1,29 @@
 ---
 lowercaseOutputLabelNames: true
 lowercaseOutputName: true
+whitelistObjectNames: ["org.apache.cassandra.metrics:*"]
+blacklistObjectNames:
+  # ColumnFamily is an alias for Table metrics
+  - "org.apache.cassandra.metrics:type=ColumnFamily,*"
+  #
+  # These are very costly for cassandra to retrieve,
+  # and we don't make use of them on grafana currently.
+  # See also steps taken in https://github.com/criteo/cassandra_exporter
+  # metrics docs: http://cassandra.apache.org/doc/latest/operating/metrics.html
+  #
+  # "estimated" metrics
+  - "org.apache.cassandra.metrics:name=PendingTasks,*"
+  - "org.apache.cassandra.metrics:name=PendingTasksByTableName,*"
+  - "org.apache.cassandra.metrics:name=EstimatedPartitionSizeHistogram,*"
+  - "org.apache.cassandra.metrics:name=EstimatedPartitionCount,*"
+  - "org.apache.cassandra.metrics:name=EstimatedColumnCountHistogram,*"
+  - "org.apache.cassandra.metrics:name=PendingFlushes,*"
+  - "org.apache.cassandra.metrics:name=PendingCompactions,*"
+  # disk space metrics
+  - "org.apache.cassandra.metrics:name=LiveDiskSpaceUsed,*"
+  - "org.apache.cassandra.metrics:name=TotalDiskSpaceUsed,*"
+  - "org.apache.cassandra.metrics:name=BloomFilterDiskSpaceUsed,*"
+  - "org.apache.cassandra.metrics:name=TrueSnapshotsSize,*"
 rules:
   - pattern: org.apache.cassandra.metrics<type=(Connection|Streaming), scope=(\S*), name=(\S*)><>(Count|Value|\d+thPercentile|\w+Rate|Max|Mean|Min|StdDev)
     name: cassandra_$1_$3
