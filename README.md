@@ -63,14 +63,14 @@ For a list of all variables, see `defaults/main.yml`.
 
 The following should be installed before installing this role:
 
-- java (openJDK or Oracle, see [A note on openjdk vs oracle:](#a-note-on-openjdk-vs-oracle))
+- Java 8 (openJDK or Oracle, see [A note on openjdk vs oracle:](#a-note-on-openjdk-vs-oracle))
 - ntp
 
 For the above dependencies, you can use the same roles as in `molecule/default/requirements.yml` - but you don't have to.
 
 ## Platforms
 
-- Currently tested with ubuntu 16.04 only
+- Currently tested with Ubuntu 16.04 and Ubuntu 18.04 (see [A note on Java 8 and Ubuntu 18.04](#a-note-on-Java-8-and-Ubuntu-18.04)).
 
 ## Example Playbook
 
@@ -110,10 +110,12 @@ Then the following should work and start your cluster:
     cassandra_cluster_name: my_cluster
     cassandra_keyspaces:
       - my_keyspace1
+    # set installed java package version manually. required when using Ubuntu 18.04. see: [A note on Java 8 and Ubuntu 18.04](#a-note-on-Java-8-and-Ubuntu-18.04)
+    java_packages: openjdk-8-jdk
   roles:
-    # ensure to install java ntp first, e.g. by running these roles (see Dependencies section):
+    # ensure to install java and ntp first, e.g. by running these roles (see Dependencies section):
     # - ansible-ntp
-    # - ansible-java
+    # - ansible-role-java
     - ansible-cassandra
 ```
 
@@ -143,6 +145,14 @@ In the [official upgrade-to-DSE docs](https://docs.datastax.com/en/pdf/upgrade.p
 > end of public updates for Oracle JRE/JDK 8.)
 
 It seems OpenJDK is the more future-proof JVM to use. This role is tested using openjdk.
+
+## A note on Java 8 and Ubuntu 18.04:
+
+In order to deploy Java on Ubuntu using Ansible, we have been using the 'ansible-role-java' role. This role will install OpenJDK 11 on Ubuntu 18.04 by default. If you are using this role, it is required to set the 'java_packages' variable before running it. for example:
+```yaml
+# set the java packages installed by the ansible-role-java role manually.
+java_packages: openjdk-8-jdk
+```
 
 ## Development setup
 
