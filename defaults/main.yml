@@ -85,6 +85,14 @@ cassandra_backup_hour: 16
 # instances that are newer than the removed instance.
 # If there are more instances than repair slots, the slots are repeated,
 # i.e. a slot is assigned to more than one instance.
+#
+# The current allocation strategy is good assuming that:
+#  - You have max. 63 nodes
+#  - Your repairs take less than 1h
+#
+# If the above assumptions do not hold, review this strategy
+# and space them out so that 2 repairs do not run at the same time 
+#
 cassandra_repair_slots:
   - { weekday: '0', hour: '23' }
   - { weekday: '1', hour: '23' }
