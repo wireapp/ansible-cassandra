@@ -5,7 +5,7 @@ Ansible role to install an Apache Cassandra cluster supervised by systemd. Inclu
 * Some OS tuning options such as installing jemalloc, setting max_map_count and tcp_keepalive, disabling swap.
 * Bootstraps nodes using the IPs of the servers in the `cassandra_seed` (configurable) inventory group.
 * Weekly scheduled repairs via cron jobs that are non-overlapping (see `cassandra_repair_slots`).
-    * requires setting `cassandra_keyspaces` (default `[]` will have no effect)
+    * Note that **all** keyspaces will be scheduled for repairs
 * Incremental and full backup scripts as well as a restore script. (disabled by default, optional) (NOTE: needs better testing)
     * backup/restore requires access to S3.
 * prometheus-style metrics using jmx-exporter
@@ -40,12 +40,6 @@ Give your cluster a better name:
 ```yaml
 # set cassandra_cluster_name before running the playbook for the first time; never change it afterwards
 cassandra_cluster_name: default
-```
-
-You should override the keyspaces to match keyspaces on which you wish to run weekly repairs:
-
-```yaml
-cassandra_keyspaces: []
 ```
 
 You may wish to override the following defaults to enable backups:
@@ -108,8 +102,6 @@ Then the following should work and start your cluster:
   vars:
     # set cluster_name before running the playbook for the first time; never change it afterwards
     cassandra_cluster_name: my_cluster
-    cassandra_keyspaces:
-      - my_keyspace1
     # set installed java package version manually. required when using Ubuntu 18.04. see: [A note on Java 8 and Ubuntu 18.04](#a-note-on-Java-8-and-Ubuntu-18.04)
     java_packages: openjdk-8-jdk
   roles:

@@ -45,7 +45,6 @@ cassandra_env: dev
 cassandra_cluster_name: default
 cassandra_role: 'cassandra_{{ cassandra_cluster_name }}'
 cassandra_seed_role: '{{ cassandra_role }}_seed'
-cassandra_keyspaces: []
 cassandra_metrics_prefix: 'cassandra_{{ cassandra_cluster_name }}'
 
 cassandra_snitch: '{% if is_aws_environment %}Ec2Snitch{% else %}SimpleSnitch{% endif %}'

@@ -11,11 +11,11 @@ metrics_file=${metrics_dir}/cassandra_repair.prom
 metrics_tmpl='
 # TYPE cassandra_repair counter
 # HELP cassandra_repair Counts the number of repairs and the status
-cassandra_repair{status="%s",errno="%d",keyspace="%s"} 1 %d
+cassandra_repair{status="%s",errno="%d"} 1 %d
 
 # TYPE cassandra_repair_duration_seconds gauge
 # HELP cassandra_repair_duration_seconds Track the duration of the repair task, in seconds
-cassandra_repair_duration_seconds{status="%s",keyspace="%s"} %d %d
+cassandra_repair_duration_seconds{status="%s"} %d %d
 '
 
 started_at=$(date +%s%3N)
@@ -23,33 +23,29 @@ started_at=$(date +%s%3N)
 function report_metrics {
     status=$1
     errno=$2
-    keyspace=$3
 
     now=$(date +%s%3N)
 
     # nb. the date must be milliseconds since the epoch
     printf "$metrics_tmpl" \
-        $status $errno $keyspace $now $status $keyspace $(((now-started_at)/1000)) $now > ${metrics_file}.$$
+        $status $errno $now $status $(((now-started_at)/1000)) $now > ${metrics_file}.$$
     mv -v ${metrics_file}.$$ ${metrics_file} || true
 }
 
-{% for keyspace in cassandra_keyspaces %}
 # Check if a repair is still running
-if ps -u cassandra -f | grep "repair {{ keyspace }}" > /dev/null
+if ps -u cassandra -f | grep "repair" > /dev/null
 then
-    report_metrics "aborted" 255 "{{ keyspace }}"
+    report_metrics "aborted" 255
     exit 255;
 fi
 
 # Run repair
 su - {{ cassandra_user }} \
-    -c '/opt/cassandra/bin/nodetool repair {{ keyspace }} -full -pr'
+    -c '/opt/cassandra/bin/nodetool repair -full -pr'
 
 if [ $? -ne 0 ]; then
   st="failed"
 else
   st="succeeded"
 fi
-report_metrics $st $? "{{ keyspace }}"
-
-{% endfor %}
+report_metrics $st $?
