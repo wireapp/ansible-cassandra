@@ -4,6 +4,7 @@
 #
 # Unfortunately, we also need 'pip' to properly install 'awscli',
 # which pulls in some unwanted stuff (namely 'build-essential').
+# TODO: make this more sane.
 - name: install awscli
   pip:
     name: "awscli"

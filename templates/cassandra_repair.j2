@@ -43,7 +43,7 @@ fi
 
 # Run repair
 su - {{ cassandra_user }} \
-    -c '/opt/cassandra/bin/nodetool repair {{ keyspace }} -full -pr'
+    -c '{{ cassandra_link_dir }}/bin/nodetool repair {{ keyspace }} -full -pr'
 
 if [ $? -ne 0 ]; then
   st="failed"
