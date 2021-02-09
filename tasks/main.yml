@@ -13,6 +13,7 @@
     - systemd
 
 - import_tasks: repairs_backups.yml
+  when: cassandra_backup_enabled
   tags:
     - repairs
     - backups
