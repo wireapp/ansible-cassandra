@@ -27,10 +27,10 @@ credentials_validity_in_ms: 2000
 partitioner: org.apache.cassandra.dht.Murmur3Partitioner
 
 # directories
-data_file_directories: [/mnt/cassandra/data]
-commitlog_directory:    /mnt/cassandra/commitlog
-saved_caches_directory: /mnt/cassandra/saved_caches
-hints_directory:        /mnt/cassandra/hints
+data_file_directories: ['{{ cassandra_data_dir }}/data']
+commitlog_directory:    '{{ cassandra_data_dir }}/commitlog'
+saved_caches_directory: '{{ cassandra_data_dir }}/saved_caches'
+hints_directory:        '{{ cassandra_data_dir }}/hints'
 
 disk_failure_policy: stop
 commit_failure_policy: stop
