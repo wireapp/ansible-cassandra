@@ -13,6 +13,7 @@ cassandra_rpc_port: 9160
 cassandra_install_parent_dir: "/opt"
 cassandra_link_dir: "/opt/cassandra"
 cassandra_install_dir: "{{ cassandra_install_parent_dir }}/apache-cassandra-{{ cassandra_version }}"
+cassandra_data_dir: "/mnt/cassandra"
 cassandra_gc_log_dir: "{{ cassandra_install_dir }}/logs"
 cassandra_group: cassandra
 cassandra_user: cassandra
