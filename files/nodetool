@@ -1,1 +1,1 @@
-/opt/cassandra/bin/nodetool "$@"
+/opt/cassandra/bin/nodetool -Dcom.sun.jndi.rmiURLParsing=legacy "$@"
