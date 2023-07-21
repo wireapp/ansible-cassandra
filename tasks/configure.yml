@@ -72,7 +72,7 @@
         mode: 0644
         owner: '{{ cassandra_user }}'
         group: '{{ cassandra_group }}'
-        sha256sum: '{{ cassandra_sha256 }}'
+        checksum: 'sha256:{{ cassandra_sha256 }}'
 
     - name: unpack tarball
       unarchive:
@@ -162,7 +162,7 @@
     mode: 0644
     owner: '{{ cassandra_user }}'
     group: '{{ cassandra_group }}'
-    sha256sum: '{{ prometheus_jmx_sha256 }}'
+    checksum: 'sha256:{{ prometheus_jmx_sha256 }}'
   when: cassandra_install_prometheus_jmx_exporter
 
 - name: prometheus jmx config
