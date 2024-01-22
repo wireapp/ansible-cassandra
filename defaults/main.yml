@@ -2,7 +2,7 @@
 # defaults file for ansible-cassandra
 
 cassandra_version: '3.11.4'
-cassandra_sha256: '5d598e23c3ffc4db0301ec2b313061e3208fae0f9763d4b47888237dd9069987'
+cassandra_sha256: 'sha256:5d598e23c3ffc4db0301ec2b313061e3208fae0f9763d4b47888237dd9069987'
 cassandra_file: 'apache-cassandra-{{ cassandra_version }}-bin.tar.gz'
 cassandra_mirror: 'http://archive.apache.org/dist/cassandra'
 cassandra_url: '{{ cassandra_mirror }}/{{ cassandra_version }}/{{ cassandra_file }}'
@@ -70,7 +70,7 @@ cassandra_activate: true
 cassandra_install_prometheus_jmx_exporter: true
 prometheus_jmx_port: 8081
 prometheus_jmx_version: '0.10'  # cf.: https://github.com/prometheus/jmx_exporter/issues/(155|156)
-prometheus_jmx_sha256: b144a5a22fc9ee62d8d198f0dcc622f851c77cf52fee4bd529afbc266af37e29
+prometheus_jmx_sha256: sha256:b144a5a22fc9ee62d8d198f0dcc622f851c77cf52fee4bd529afbc266af37e29
 prometheus_jmx_sha512: bdcf3414e5fc4d5760839333044e398e12a8e8c8dabf026805b3b2a5135aca90a81c91f81e7aac6b3b5f296bc10fbc19a3becd5ff12214c99e929bbec4c22ecb
 prometheus_jmx_url: "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/{{ prometheus_jmx_version }}/jmx_prometheus_javaagent-{{ prometheus_jmx_version }}.jar"
 
