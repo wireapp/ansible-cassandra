@@ -1,9 +1,7 @@
 ---
 
 # Install awscli for backup scripts
-#
-# Unfortunately, we also need 'pip' to properly install 'awscli',
-# which pulls in some unwanted stuff (namely 'build-essential').
+# Will be installed as pip module, which requires an internet connection
 - name: install awscli
   pip:
     name: "awscli"
