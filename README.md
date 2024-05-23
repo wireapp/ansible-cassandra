@@ -47,6 +47,7 @@ You may wish to override the following defaults to enable backups:
 ```yaml
 # backups
 cassandra_backup_enabled: false # recommended to enable this
+cassandra_incremental_backup_enabled: false # enable for built-in incremental backup routine
 cassandra_backup_s3_bucket: # set a name here and ensure hosts have access rights to an S3 bucket
 cassandra_env: dev # used in naming backups in case you have more than one environment (e.g. production, staging, ...)
 ```
