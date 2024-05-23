@@ -37,6 +37,8 @@ cassandra_disable_swap: true
 aws_cli_version: "1.16.137"
 # recommended to enable this; requires setting 'cassandra_backup_s3_bucket'
 cassandra_backup_enabled: false
+# requires setting 'cassandra_backup_s3_bucket'
+cassandra_incremental_backup_enabled: false
 # uncomment, set a name here and ensure access rights to an S3 bucket
 # cassandra_backup_s3_bucket:
 # used in naming backups in case you have more than one environment (e.g. production, staging, ...)

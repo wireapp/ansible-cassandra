@@ -118,7 +118,9 @@ rpc_min_threads: 0
 rpc_max_threads: 32
 thrift_framed_transport_size_in_mb: 15
 
+{% if cassandra_incremental_backup_enabled %}
 incremental_backups: true
+{% endif %}
 
 snapshot_before_compaction: false
 auto_snapshot: true

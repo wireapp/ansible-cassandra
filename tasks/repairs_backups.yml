@@ -9,7 +9,7 @@
     name: "awscli"
     state: present
     version: "{{ aws_cli_version }}"
-  when: cassandra_backup_enabled
+  when: cassandra_backup_enabled or cassandra_incremental_backup_enabled
 
 - name: render repair script
   template:
@@ -50,7 +50,7 @@
     mode: 0755
     owner: cassandra
     group: cassandra
-  when: cassandra_backup_enabled
+  when: cassandra_incremental_backup_enabled
   tags:
     - backup
 
@@ -73,7 +73,7 @@
     minute: '0,15,30,45'
     job: "flock -n /tmp/incr_bckup_excl_lock /usr/local/bin/cassandra_incremental_backup_{{ cassandra_cluster_name }} 2>&1 | systemd-cat -t cassandra-backup"
     state: present
-  when: cassandra_backup_enabled
+  when: cassandra_incremental_backup_enabled
   tags:
     - backup
 
