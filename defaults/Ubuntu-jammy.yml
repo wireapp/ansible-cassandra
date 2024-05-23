@@ -2,3 +2,4 @@
 cassandra_dep_os_pkgs:
   - procps
   - libjemalloc2
+  - python3-pip
