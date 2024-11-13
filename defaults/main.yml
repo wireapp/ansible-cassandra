@@ -87,7 +87,23 @@ cassandra_backup_hour: 16
 # instances that are newer than the removed instance.
 # If there are more instances than repair slots, the slots are repeated,
 # i.e. a slot is assigned to more than one instance.
+#
+# The current allocation strategy is good assuming that:
+#  - You have max. 63 nodes
+#  - Your repairs take less than 1h
+#
+# If the above assumptions do not hold, review this strategy
+# and space them out so that 2 repairs do not run at the same time 
+#
 cassandra_repair_slots:
+  - { weekday: '0', hour: '23' }
+  - { weekday: '1', hour: '23' }
+  - { weekday: '2', hour: '23' }
+  - { weekday: '3', hour: '23' }
+  - { weekday: '4', hour: '23' }
+  - { weekday: '5', hour: '23' }
+  - { weekday: '6', hour: '23' }
+
   - { weekday: '0', hour: '0' }
   - { weekday: '1', hour: '0' }
   - { weekday: '2', hour: '0' }
@@ -95,6 +111,14 @@ cassandra_repair_slots:
   - { weekday: '4', hour: '0' }
   - { weekday: '5', hour: '0' }
   - { weekday: '6', hour: '0' }
+
+  - { weekday: '0', hour: '1' }
+  - { weekday: '1', hour: '1' }
+  - { weekday: '2', hour: '1' }
+  - { weekday: '3', hour: '1' }
+  - { weekday: '4', hour: '1' }
+  - { weekday: '5', hour: '1' }
+  - { weekday: '6', hour: '1' }
 
   - { weekday: '0', hour: '2' }
   - { weekday: '1', hour: '2' }
@@ -104,6 +128,14 @@ cassandra_repair_slots:
   - { weekday: '5', hour: '2' }
   - { weekday: '6', hour: '2' }
 
+  - { weekday: '0', hour: '3' }
+  - { weekday: '1', hour: '3' }
+  - { weekday: '2', hour: '3' }
+  - { weekday: '3', hour: '3' }
+  - { weekday: '4', hour: '3' }
+  - { weekday: '5', hour: '3' }
+  - { weekday: '6', hour: '3' }
+
   - { weekday: '0', hour: '4' }
   - { weekday: '1', hour: '4' }
   - { weekday: '2', hour: '4' }
@@ -112,6 +144,14 @@ cassandra_repair_slots:
   - { weekday: '5', hour: '4' }
   - { weekday: '6', hour: '4' }
 
+  - { weekday: '0', hour: '5' }
+  - { weekday: '1', hour: '5' }
+  - { weekday: '2', hour: '5' }
+  - { weekday: '3', hour: '5' }
+  - { weekday: '4', hour: '5' }
+  - { weekday: '5', hour: '5' }
+  - { weekday: '6', hour: '5' }
+
   - { weekday: '0', hour: '6' }
   - { weekday: '1', hour: '6' }
   - { weekday: '2', hour: '6' }
@@ -119,3 +159,11 @@ cassandra_repair_slots:
   - { weekday: '4', hour: '6' }
   - { weekday: '5', hour: '6' }
   - { weekday: '6', hour: '6' }
+
+  - { weekday: '0', hour: '7' }
+  - { weekday: '1', hour: '7' }
+  - { weekday: '2', hour: '7' }
+  - { weekday: '3', hour: '7' }
+  - { weekday: '4', hour: '7' }
+  - { weekday: '5', hour: '7' }
+  - { weekday: '6', hour: '7' }
